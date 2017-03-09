@@ -1,0 +1,2787 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "v1",
+        "title": "Aditazz API",
+        "description": "The first version of the Aditazz Data APIs is an exciting step forward towards making it easier for higher level application services, web, and mobile apps to have open access to underlying data. \n\nAlthough the endpoints will be accessible via only https in production, the development environment\nallows http. The APIs are accessible at `dev-api.aditazz.com` in development. \nTypically each request will have two types of authentication information. Currently the API level\nauthentication is NOT enforced.\n\n# **1. API level authentication **\nEach API request will send one of the following two headers\n\n  **i)** A pair of APiKey and APISecret via **X-AZ-API-KEY** and **X-AZ-API-SECRET** via headers!\n  \n  **Or**\n  \n  **ii)** A single access token **X-AZ-API-TOKEN**\"\n\n# **2. User level authentication **\nWhen you request an access token the very first time user logs into application, send the value as the HTTP Basic Authentication credentials by using their **logIn** and **password**. When you call APIs, send the value as the access token with the authentication type set as Bearer. \n\nFor example: **Authorization: Bearer Access-Token**.\n\nYou're best off using an JWT access_token for the authenticated user for each\nendpoint/API request.\n\n\n## Limits\nCurrently there are no limits imposed to any of the APIs.\n"
+    },
+    "host": "dev-api.aditazz.com",
+    "basePath": "/v1/",
+    "schemes": [
+        "https"
+    ],
+    "securityDefinitions": {
+        "JWTAPIToken": {
+            "description": "An access token for Application and API level authentication. This is not supported currently.",
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-AZ-API-TOKEN"
+        },
+        "JWTUSERToken": {
+            "description": "An access token for user level authentication and authorization information. An application can get a user token by calling `/auth/login` API call.",
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-AZ-USER-TOKEN"
+        },
+        "APIKey": {
+            "description": "Another option to implement an application and API level authentication. This is also not supported currently.",
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-AZ-API-KEY"
+        },
+        "APISecret": {
+            "description": "Optional information goes with `APIKey` way of implementing an application and API level authentication. This is also not supported currently.",
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-AZ-API-SECRET"
+        },
+        "BasicSecurity": {
+            "description": "The standard basic authentication information passed to `/auth/login` and in exchange you will receive the `JWTUSERToken` for the user.",
+            "type": "basic"
+        }
+    },
+    "security": [
+        {
+            "APIKey": []
+        },
+        {
+            "APISecret": []
+        },
+        {
+            "BasicSecurity": []
+        },
+        {
+            "JWTAPIToken": []
+        },
+        {
+            "JWTUSERToken": []
+        }
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "paths": {
+        "/auth/register": {
+            "post": {
+                "summary": "Registers a new user",
+                "description": "Adds a new user object to the users list.\n",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "description": "The user to be created.  \nAn example looks like this:  \n\n```JSON\n{\n    \"user\": \"Test0301\",\n    \"email\": \"Test0301@company.com\",\n    \"password\": \"test\"\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response will include the actual user object created\nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"email\": \"Test0301@company.com\",\n  \"name\": null,\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d\"\n    },\n    \"user\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "409": {
+                        "description": "When the user object is already in the system.\nAn example looks like this:  \n\n```JSON\n{\n  \"message\": \"Username 'Test0301@company.com' already registered\"\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "get": {
+                "summary": "Login the useer.",
+                "description": "Login the useer. Upon a successful login return a JWT token.\n",
+                "responses": {
+                    "200": {
+                        "description": "Successful response will include the JWT token.\nAn example looks like this:  \n\n```JSON\n{\n  \"token\": \"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkYWFzLmFkbWluQGFkaXRhenouY29tIiwic2NvcGVzIjpbIjA6MiIsIjE6MiIsIjI6MiJdLCJpc3MiOiJodHRwOi8vYWRpdGF6ei5jb20iLCJpYXQiOjE0ODg0MzU0MDgsImV4cCI6MTQ4ODQ4OTQwOH0.lY2Ty0rep8LsyKf_-ZWLeVzzpGTi87yGrexzyZMukpbvLokVChEDiyJN8UBr8d4a9MV-ehunO6ImlOk_5wu8Uw\"\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Token"
+                        }
+                    },
+                    "404": {
+                        "description": "When a User object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets `User` objects.\nOptional query params of **projection** or **fields** determines\nfields of user object returned. Query paramters may optionally include **pageSize** and/or **pageNumber** to limit the number of User objects returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/pageSize"
+                    },
+                    {
+                        "$ref": "#/parameters/pageNumber"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will include the user objects.\nAn example looks like this:  \n\n```JSON\n{\n  \"_embedded\": {\n    \"users\": [\n      {\n        \"uuid\": \"9e7d6c87-be04-489c-bc67-5c90b020cf15\",\n        \"name\": \"DaaS Admin\",\n        \"email\": \"daas.admin@aditazz.com\",\n        \"password\": \"$2a$10$Y0Q9y6PpR9bkvegxjNjnveTZ6z0kuEoeAw3eeWGxApghZndP//PXi\",\n        \"_links\": {\n          \"self\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/users/9e7d6c87-be04-489c-bc67-5c90b020cf15\"\n          },\n          \"user\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/users/9e7d6c87-be04-489c-bc67-5c90b020cf15{?projection}\",\n            \"templated\": true\n          }\n        }\n      },\n      {\n        \"uuid\": \"fd4fbcb7-bdd2-4f76-81b5-007c987cee24\",\n        \"name\": \"Test\",\n        \"email\": \"test.admin@aditazz.com\",\n        \"password\": \"$2a$10$GD5b31ZLFtXUUEMdQdgbUeuOzCTVV2A0F.RRT54x8st6tc6RFeQra\",\n        \"_links\": {\n          \"self\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/users/fd4fbcb7-bdd2-4f76-81b5-007c987cee24\"\n          },\n          \"user\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/users/fd4fbcb7-bdd2-4f76-81b5-007c987cee24{?projection}\",\n            \"templated\": true\n          }\n        }\n      },\n\n  \"page\": {\n    \"size\": 20,\n    \"totalElements\": 1,\n    \"totalPages\": 1,\n    \"number\": 0\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Users"
+                        }
+                    },
+                    "404": {
+                        "description": "When a User object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Creates a User object",
+                "description": "Adds a new User object to the User list.\n",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "description": "The user to be created.\nAn example looks like this:  \n```JSON\n{\n    \"user\": \"Test0301\",\n    \"email\": \"Test0301@company.com\",\n    \"password\": \"test\"\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response will include the actual user object created\nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"email\": \"Test0301@company.com\",\n  \"name\": null,\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d\"\n    },\n    \"user\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "409": {
+                        "description": "When the user object is already in the system.\nAn example looks like this:  \n\n```JSON\n{\n  \"message\": \"Username 'Test0301@company.com' already registered\"\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{uuid}": {
+            "get": {
+                "summary": "Gets a specific user object.",
+                "description": "Gets a `User` object matching the 'uuid'\nOptional query params of **projection** or **fields** determines\nfields of user object returned. An example request is `http://dev-api.aditazz.net/v1/users/519e905f-a424-4dd9-b1d8-a1e4599a110e` .\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will retrieve the user object.\nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"email\": \"Test0301@company.com\",\n  \"name\": \"Test0301\",\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d\"\n    },\n    \"user\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "404": {
+                        "description": "When a User object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Modifies a User object",
+                "description": "Modifies an existing user object with the new information.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "description": "The user to be updated.  \nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"name\": \"Test0302\"\n\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will include the actual user object updated\nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"email\": \"Test0301@company.com\",\n  \"name\": \"Test0302\",\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d\"\n    },\n    \"user\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "404": {
+                        "description": "When a User object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes a User object",
+                "description": "Deletes a User object from the Users list. Example is like `http://dev-api.aditazz.net/v1/users/4e9dc098-807f-49e6-8fd0-142480f18418`\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response indicates the user is deleted."
+                    },
+                    "404": {
+                        "description": "When a User object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/search/findByEmail": {
+            "get": {
+                "summary": "Gets a specific user object by users email address.",
+                "description": "Gets a `User` object matching the 'email'\nOptional query params of **projection** or **fields** determines\nfields of user object returned. An example request is `http://dev-api.aditazz.net/v1/users/search//findByEmail?email=daas.admin@aditazz.com` .\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/email"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will retrieve the user object.\nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"email\": \"Test0301@company.com\",\n  \"name\": \"Test0301\",\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d\"\n    },\n    \"user\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/764082bb-efd6-4409-9cbc-4bd20f992f1d{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "404": {
+                        "description": "When a User object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/roles": {
+            "post": {
+                "summary": "Creates a Role object. The `X-AZ-USER-TOKEN` must be of an admin JWT token. So, any user with `USER_FULL` role can grant new roles to any other user.",
+                "description": "Adds a new role object to the roles list.\n",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "description": "The role object to be created.\nAn example looks like this:  \n```JSON\n{\n\"user\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n\"service\": 0,\n\"access\": 0\n}\n```\n",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Role"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will return the role object created.\nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"4e9dc098-807f-49e6-8fd0-142480f18415\",\n  \"user\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"service\": 0,\n  \"access\": 0,\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/roles/4e9dc098-807f-49e6-8fd0-142480f18415\"\n    },\n    \"role\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/roles/4e9dc098-807f-49e6-8fd0-142480f18415{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Role"
+                        }
+                    },
+                    "400": {
+                        "description": "When a Role object is NOT created",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/roles/{uuid}": {
+            "get": {
+                "summary": "Gets a specific role object.",
+                "description": "Gets a `role` object matching the 'uuid'\nOptional query params of **projection** or **fields** determines\nfields of user object returned. An example request is `http://dev-api.aditazz.net/v1/roles/4e9dc098-807f-49e6-8fd0-142480f18415` .\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will retrieve the role object.\nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"4e9dc098-807f-49e6-8fd0-142480f18415\",\n  \"user\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"service\": 0,\n  \"access\": 0,\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/roles/4e9dc098-807f-49e6-8fd0-142480f18415\"\n    },\n    \"role\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/roles/4e9dc098-807f-49e6-8fd0-142480f18415{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Role"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Role object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Modifies a Role object.",
+                "description": "Modifies an existing role object with the new information.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "name": "role",
+                        "description": "The user to be updated.  \nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"4e9dc098-807f-49e6-8fd0-142480f18415\",\n  \"user\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"service\": 0,\n  \"access\": 1\n}\n```\n",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Role"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will include the actual role object updated\nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"4e9dc098-807f-49e6-8fd0-142480f18415\",\n  \"user\": \"764082bb-efd6-4409-9cbc-4bd20f992f1d\",\n  \"service\": 0,\n  \"access\": 1,\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/roles/4e9dc098-807f-49e6-8fd0-142480f18415\"\n    },\n    \"role\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/roles/4e9dc098-807f-49e6-8fd0-142480f18415{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Role"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Role object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes a Role object.",
+                "description": "Deletes a Role object from the Roles list. Example is like `http://dev-api.aditazz.net/v1/roles/4e9dc098-807f-49e6-8fd0-142480f18415`\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response indicates the user is deleted."
+                    },
+                    "404": {
+                        "description": "When a Role object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{user_uuid}/roles": {
+            "get": {
+                "summary": "Find Role by role user uuid. If the name is not unique (exact match), it may return the multiple values.",
+                "description": "Find Role by role user uuid.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/user_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Roles"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Role object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{user_uuid}/services/{service_id}/roles": {
+            "get": {
+                "summary": "Find Role by role uuid. If the name is not unique (exact match), it may return the multiple values.",
+                "description": "Find Role by role uuid.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/user_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/service_id"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Role"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Role object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/contents": {
+            "get": {
+                "summary": "This is a GET operation to return the contents in pages.",
+                "description": "Gets `Content` objects.\nOptional query params of **projection** or **fields** determines\nfields of user object returned. Query paramters may optionally include **pageSize** and/or **pageNumber** to limit the number of User objects returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/pageSize"
+                    },
+                    {
+                        "$ref": "#/parameters/pageNumber"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will return all the content objects.\nAn example looks like this:  \n\n```JSON\n{\n  \"_embedded\": {\n    \"users\": [\n      {\n        \"uuid\": \"9e7d6c87-be04-489c-bc67-5c90b020cf15\",\n        \"name\": \"User1\",\n        \"email\": \"user1@aditazz.com\",\n         \"_links\": {\n          \"self\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/users/9e7d6c87-be04-489c-bc67-5c90b020cf15\"\n          },\n          \"user\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/users/9e7d6c87-be04-489c-bc67-5c90b020cf15{?projection}\",\n            \"templated\": true\n          }\n        }\n      },\n      {\n        \"uuid\": \"0fd6ccde-7d3e-4220-a7e4-110b824bc19c\",\n        \"name\": null,\n        \"email\": \"Test0301@company.com\",\n        \"password\": \"$2a$10$Kz1wT6npjMnT7jdXkXEc2eB5NqyXlpBgik/OOcHEXjjnUcczNlKYa\",\n        \"_links\": {\n          \"self\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/users/0fd6ccde-7d3e-4220-a7e4-110b824bc19c\"\n          },\n          \"user\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/users/0fd6ccde-7d3e-4220-a7e4-110b824bc19c{?projection}\",\n            \"templated\": true\n          }\n        }\n      }\n    ]\n  },\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users\"\n    },\n    \"profile\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/profile/users\"\n    },\n    \"search\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/users/search\"\n    }\n  },\n  \"page\": {\n    \"size\": 20,\n    \"totalElements\": 2,\n    \"totalPages\": 1,\n    \"number\": 0\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Contents"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Content object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Creates a Content object",
+                "description": "Adds a new Content object to the Contents list.\n",
+                "parameters": [
+                    {
+                        "name": "content",
+                        "in": "body",
+                        "required": true,
+                        "description": "The content to be created.\nAn example looks like this:  \n```JSON\n{\n    \"name\": \"AF7018 - Side Chair with Bigger Arms\",\n    \"cell_name\": \"AF7018\",\n    \"category\": \"cswk\",\n    \"sub_category\": \"CONTENT_SET\",\n    \"model_url\": \"http://aditazz.com\",\n    \"units\": \"m\",\n    \"spatial_rep\": {\n        \"bounding_box_dim\": {\n            \"x_value\": 10,\n            \"y_value\": 50,\n            \"z_value\": 100\n        },\n        \"clearance_box_dim\": {\n            \"x_value\": 10,\n            \"y_value\": 50,\n            \"z_value\": 100\n        },\n        \"clearance_box_offset\": {\n            \"x_value\": 10,\n            \"y_value\": 50,\n            \"z_value\": 100\n        }\n    }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response will include the actual content object created\nAn example looks like this:  \n\n```JSON\n{\n  \"name\": \"AF7018 - Side Chair with Bigger Arms\",\n  \"category\": \"CSWK\",\n  \"units\": \"m\",\n  \"tags\": null,\n  \"content_uuid\": \"e2e71434-9d06-42fa-bbe0-454ced27d018\",\n  \"cell_name\": \"AF7018\",\n  \"sub_category\": \"CONTENT_SET\",\n  \"model_url\": \"http://aditazz.com\",\n  \"spatial_rep\": {\n    \"spatial_uuid\": \"3f33ba54-7f74-4f18-94d1-1a487039a5bc\",\n    \"bounding_box_dim\": {\n      \"x_value\": 10,\n      \"y_value\": 50,\n      \"z_value\": 100\n    },\n    \"clearance_box_dim\": {\n      \"x_value\": 10,\n      \"y_value\": 50,\n      \"z_value\": 100\n    },\n    \"clearance_box_offset\": {\n      \"x_value\": 10,\n      \"y_value\": 50,\n      \"z_value\": 100\n    }\n  },\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/contents/e2e71434-9d06-42fa-bbe0-454ced27d018\"\n    },\n    \"contents\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/contents/e2e71434-9d06-42fa-bbe0-454ced27d018{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    },
+                    "400": {
+                        "description": "When a Content object is NOT created",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/contents/{uuid}": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets a `Content` object matching the 'uuid'\nOptional query params of **projection** or **fields** determines\nfields of content object returned. An example request is `http://dev-api.aditazz.net/v1/contents/3c0f3dcb-d512-400c-a42c-f76ad507df1a` .\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will retrieve the content object.\nAn example looks like this:  \n\n```JSON\n{\n  \"name\": \"AF6018 - Side Chair with Arms\",\n  \"category\": \"CSWK\",\n  \"units\": \"m\",\n  \"tags\": [],\n  \"content_uuid\": \"3c0f3dcb-d512-400c-a42c-f76ad507df1a\",\n  \"cell_name\": \"AF6018\",\n  \"sub_category\": \"CONTENT_SET\",\n  \"model_url\": \"http://aditazz.com\",\n  \"spatial_rep\": {\n    \"spatial_uuid\": \"151efe93-4686-4466-8e14-cbf9976baed9\",\n    \"bounding_box_dim\": {\n      \"x_value\": 10,\n      \"y_value\": 50,\n      \"z_value\": 100\n    },\n    \"clearance_box_dim\": {\n      \"x_value\": 10,\n      \"y_value\": 50,\n      \"z_value\": 100\n    },\n    \"clearance_box_offset\": {\n      \"x_value\": 10,\n      \"y_value\": 50,\n      \"z_value\": 100\n    }\n  },\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/contents/3c0f3dcb-d512-400c-a42c-f76ad507df1a\"\n    },\n    \"contents\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/contents/3c0f3dcb-d512-400c-a42c-f76ad507df1a{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Content object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Modifies an existing Content object",
+                "description": "Modifies an existing Content object with the new information.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "name": "content",
+                        "in": "body",
+                        "required": true,
+                        "description": "The content to be updated.  \nAn example looks like this:  \n\n```JSON\n{\n  \"uuid\": \"3e2e71434-9d06-42fa-bbe0-454ced27d018\",\n  \"name\": \"AF6018 - Side Chair with Arms (Modified)\"\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will retrieve the content object.\nAn example looks like this:  \n\n```JSON\n{\n  \"name\": \"AF6018 - Side Chair with Arms (Modified)\",\n  \"category\": \"CSWK\",\n  \"units\": \"m\",\n  \"tags\": [],\n  \"content_uuid\": \"3c0f3dcb-d512-400c-a42c-f76ad507df1a\",\n  \"cell_name\": \"AF6018\",\n  \"sub_category\": \"CONTENT_SET\",\n  \"model_url\": \"http://aditazz.com\",\n  \"spatial_rep\": {\n    \"spatial_uuid\": \"151efe93-4686-4466-8e14-cbf9976baed9\",\n    \"bounding_box_dim\": {\n      \"x_value\": 10,\n      \"y_value\": 50,\n      \"z_value\": 100\n    },\n    \"clearance_box_dim\": {\n      \"x_value\": 10,\n      \"y_value\": 50,\n      \"z_value\": 100\n    },\n    \"clearance_box_offset\": {\n      \"x_value\": 10,\n      \"y_value\": 50,\n      \"z_value\": 100\n    }\n  },\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/contents/3c0f3dcb-d512-400c-a42c-f76ad507df1a\"\n    },\n    \"contents\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/contents/3c0f3dcb-d512-400c-a42c-f76ad507df1a{?projection}\",\n      \"templated\": true\n    }\n  }\n}\n```\n",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Content object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes a Content object",
+                "description": "Deletes a Content object from the Contents list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response indicates the content is deleted."
+                    },
+                    "404": {
+                        "description": "When a Content object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/contents/search/findByCellName": {
+            "get": {
+                "summary": "Find Content by Aditazz or Cell name. If the name is not unique (exact match), it may return the multiple values.",
+                "description": "Find Content by Aditazz or Cell name. An example is `http://dev-api.aditazz.net/v1/content/search/findByCellName?cell_name=AF6018`.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/cell_name"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will retrieve all the matching content object.\nAn example looks like this: \n\n```JSON\n{\n  \"_embedded\": {\n    \"contents\": [\n      {\n        \"name\": \"AF6018 - Side Chair with Arms\",\n        \"category\": \"CSWK\",\n        \"units\": \"m\",\n        \"tags\": [],\n        \"content_uuid\": \"3c0f3dcb-d512-400c-a42c-f76ad507df1a\",\n        \"cell_name\": \"AF6018\",\n        \"sub_category\": \"CONTENT_SET\",\n        \"model_url\": \"http://aditazz.com\",\n        \"spatial_rep\": {\n          \"spatial_uuid\": \"151efe93-4686-4466-8e14-cbf9976baed9\",\n          \"bounding_box_dim\": {\n            \"x_value\": 10,\n            \"y_value\": 50,\n            \"z_value\": 100\n          },\n          \"clearance_box_dim\": {\n            \"x_value\": 10,\n            \"y_value\": 50,\n            \"z_value\": 100\n          },\n          \"clearance_box_offset\": {\n            \"x_value\": 10,\n            \"y_value\": 50,\n            \"z_value\": 100\n          }\n        },\n        \"_links\": {\n          \"self\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/contents/3c0f3dcb-d512-400c-a42c-f76ad507df1a\"\n          },\n          \"content\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/contents/3c0f3dcb-d512-400c-a42c-f76ad507df1a{?projection}\",\n            \"templated\": true\n          }\n        }\n      }\n    ]\n  },\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/contents/search/findByCellName?cell_name=AF6018\"\n    }\n  },\n  \"page\": {\n    \"size\": 20,\n    \"totalElements\": 1,\n    \"totalPages\": 1,\n    \"number\": 0\n  }\n}\n```          \n",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Content object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/contents/search/findByTags": {
+            "get": {
+                "summary": "Find Contents by tags specified",
+                "description": "Find Contents by Tags specified. An example is `http://dev-api.aditazz.net/v1/content/search/findByTags?tags=ADA,X-RAY`\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/tags"
+                    },
+                    {
+                        "$ref": "#/parameters/conjunction"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response will retrieve all the matching content object.\nAn example looks like this: \n\n```JSON\n {\n  \"_embedded\": {\n    \"content\": [\n      {\n        \"name\": \"AF6018 - Side Chair with Arms\",\n        \"category\": \"CSWK\",\n        \"units\": \"m\",\n        \"tags\": [\n          \"X-RAY\",\n          \"ADA\"\n        ],\n        \"content_uuid\": \"f512254f-2d75-4986-8c62-34a630112274\",\n        \"cell_name\": \"AF6018\",\n        \"sub_category\": \"CONTENT_SET\",\n        \"model_url\": \"http://aditazz.com\",\n        \"spatial_rep\": {\n          \"spatial_uuid\": \"bc3defac-0727-4b60-81e7-c6a887245953\",\n          \"bounding_box_dim\": {\n            \"x_value\": 10,\n            \"y_value\": 50,\n            \"z_value\": 100\n          },\n          \"clearance_box_dim\": {\n            \"x_value\": 10,\n            \"y_value\": 50,\n            \"z_value\": 100\n          },\n          \"clearance_box_offset\": {\n            \"x_value\": 10,\n            \"y_value\": 50,\n            \"z_value\": 100\n          }\n        },\n        \"_links\": {\n          \"self\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/content/f512254f-2d75-4986-8c62-34a630112274\"\n          },\n          \"content\": {\n            \"href\": \"http://dev-api.aditazz.net/v1/content/f512254f-2d75-4986-8c62-34a630112274{?projection}\",\n            \"templated\": true\n          }\n        }\n      }\n    ]\n  },\n  \"_links\": {\n    \"self\": {\n      \"href\": \"http://dev-api.aditazz.net/v1/content/search/findByTags?tags=ADA%2CX-RAY\"\n    }\n  },\n  \"page\": {\n    \"size\": 20,\n    \"totalElements\": 1,\n    \"totalPages\": 1,\n    \"number\": 0\n  }\n}\n``` \n",
+                        "schema": {
+                            "$ref": "#/definitions/Content"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/ruleobjects": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets `RuleObject` objects.\nOptional query params of **projection** or **fields** determines\nfields of RuleObject object returned. Query paramters may optionally include **pageSize** and/or **pageNumber** to limit the number of RuleObject objects returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/pageSize"
+                    },
+                    {
+                        "$ref": "#/parameters/pageNumber"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/RuleObjects"
+                        }
+                    },
+                    "404": {
+                        "description": "When a RuleObject object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Creates a RuleObject object",
+                "description": "Adds a new RuleObject object to the Contents list.\n",
+                "parameters": [
+                    {
+                        "name": "ruleobject",
+                        "in": "body",
+                        "required": true,
+                        "description": "The RuleObject to create.",
+                        "schema": {
+                            "$ref": "#/definitions/RuleObject"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/RuleObject"
+                        }
+                    },
+                    "400": {
+                        "description": "When a RuleObject object is NOT created",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/ruleobjects/{uuid}": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets a `RuleObject` object matching the 'uuid'\nOptional query params of **projection** or **fields** determines\nfields of RuleObject object returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/RuleObject"
+                        }
+                    },
+                    "404": {
+                        "description": "When a RuleObject object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Modifies a RuleObject object",
+                "description": "Modifies a new RuleObject object to the Contents list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "name": "RuleObject",
+                        "in": "body",
+                        "required": true,
+                        "description": "The RuleObject to create.",
+                        "schema": {
+                            "$ref": "#/definitions/RuleObject"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/RuleObject"
+                        }
+                    },
+                    "404": {
+                        "description": "When a RuleObject object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes a RuleObject object",
+                "description": "Deletes a RuleObject object from the Contents list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "When a RuleObject object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/ruleobjects/search/findByContentObject": {
+            "get": {
+                "summary": "Find RuleObject by Object Contained",
+                "description": "Find RuleObject by Object contained\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/content_uuid_q"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/RuleObjects"
+                        }
+                    },
+                    "404": {
+                        "description": "When a RuleObject object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/ruleobjects/search/findByTags": {
+            "get": {
+                "summary": "Find Rule Objects by tags specified",
+                "description": "Find Rule Objects by Tags specified\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/tags"
+                    },
+                    {
+                        "$ref": "#/parameters/conjunction"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/RuleObjects"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rules": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets `Rule` objects.\nOptional query params of **projection** or **fields** determines\nfields of Rule object returned. Query paramters may optionally include **pageSize** and/or **pageNumber** to limit the number of Rule objects returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/pageSize"
+                    },
+                    {
+                        "$ref": "#/parameters/pageNumber"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rules"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Creates a Rule object",
+                "description": "Adds a new Rule object to the Contents list.\n",
+                "parameters": [
+                    {
+                        "name": "rule",
+                        "in": "body",
+                        "required": true,
+                        "description": "The Rule to create.",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    },
+                    "400": {
+                        "description": "When a Rule object is NOT created",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rules/{uuid}": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets a `Rule` object matching the 'uuid'\nOptional query params of **projection** or **fields** determines\nfields of Rule object returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Modifies a Rule object",
+                "description": "Modifies a new Rule object to the Contents list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "name": "Rule",
+                        "in": "body",
+                        "required": true,
+                        "description": "The Rule to create.",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes a Rule object",
+                "description": "Deletes a Rule object from the Contents list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rules/search/findByTags": {
+            "get": {
+                "summary": "Find Rules by tags specified",
+                "description": "Find Rules by Tags specified\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/tags"
+                    },
+                    {
+                        "$ref": "#/parameters/conjunction"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rules"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rules/search/findByTargetObjects": {
+            "get": {
+                "summary": "Find Rules by target objects specified",
+                "description": "Find Rules by Target Objects specified\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/generic_uuids"
+                    },
+                    {
+                        "$ref": "#/parameters/conjunction"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rules"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rules/search/findByReferenceObjects": {
+            "get": {
+                "summary": "Find Rules by reference objects specified",
+                "description": "Find Rules by Reference Objects specified\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/generic_uuids"
+                    },
+                    {
+                        "$ref": "#/parameters/conjunction"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rules"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rules/search/findBySubRules": {
+            "get": {
+                "summary": "Find Rules by sub rules specified",
+                "description": "Find Rules by SUb Rules specified\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/generic_uuids"
+                    },
+                    {
+                        "$ref": "#/parameters/conjunction"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rules"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rooms": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets `Room` objects.\nOptional query params of **projection** or **fields** determines\nfields of Room object returned. Query paramters may optionally include **pageSize** and/or **pageNumber** to limit the number of Room objects returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/pageSize"
+                    },
+                    {
+                        "$ref": "#/parameters/pageNumber"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rooms"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Room object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Creates a Room object",
+                "description": "Adds a new Room object to the Contents list.\n",
+                "parameters": [
+                    {
+                        "name": "room",
+                        "in": "body",
+                        "required": true,
+                        "description": "The Room to create.",
+                        "schema": {
+                            "$ref": "#/definitions/Room"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Room"
+                        }
+                    },
+                    "400": {
+                        "description": "When a Room object is NOT created",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rooms/{uuid}": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets a `Room` object matching the 'uuid'\nOptional query params of **projection** or **fields** determines\nfields of Room object returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Room"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Room object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Modifies a Room object",
+                "description": "Modifies a new Room object to the Contents list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    },
+                    {
+                        "name": "Room",
+                        "in": "body",
+                        "required": true,
+                        "description": "The Room to create.",
+                        "schema": {
+                            "$ref": "#/definitions/Room"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Room"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Room object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes a Room object",
+                "description": "Deletes a Room object from the Contents list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/uuid"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "When a Room object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rooms/search/findByName": {
+            "get": {
+                "summary": "Find Room by name specified. if the name is not unique (exact match), it may return multiple rooms.",
+                "description": "Find Room by Name specified\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_name"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rooms"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Room object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rooms/search/findByTags": {
+            "get": {
+                "summary": "Find Rooms by tags specified",
+                "description": "Find Rooms by Tags specified\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/tags"
+                    },
+                    {
+                        "$ref": "#/parameters/conjunction"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rooms"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rooms/{room_uuid}/variations/{variation}/contents/{content_uuid}/placements": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets A 'ContentPlacement` object for a given variation.\nOptional query params of **projection** or **fields** determines\nfields of Room object returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/content_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/ContentPlacement"
+                        }
+                    },
+                    "404": {
+                        "description": "When a ContentPlacement is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Creates a 'ContentPlacement' object",
+                "description": "Adds a new ContentPlacement object to the ContentPlacements list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/content_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    },
+                    {
+                        "name": "content_placement",
+                        "in": "body",
+                        "required": true,
+                        "description": "The Content Placement Object to be created.",
+                        "schema": {
+                            "$ref": "#/definitions/ContentPlacement"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/ContentPlacement"
+                        }
+                    },
+                    "400": {
+                        "description": "When a Content Placement object is NOT created",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Modifies a ContentPlacement object",
+                "description": "Modifies a new ContentPlacement object in the ContentPlacements list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/content_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    },
+                    {
+                        "name": "content_placement",
+                        "in": "body",
+                        "required": true,
+                        "description": "The Room to create.",
+                        "schema": {
+                            "$ref": "#/definitions/ContentPlacement"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/ContentPlacement"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Content Placement object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes a ContentPlacement object",
+                "description": "Deletes a ContentPlacement object from the Contents list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/content_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "When a Content Placement object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rooms/{room_uuid}/variations/{variation}/contents/{content_uuid}/placements/search/findByTags": {
+            "get": {
+                "summary": "Find Content Placements by tags specified",
+                "description": "Find Content Placements by Tags specified\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/content_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    },
+                    {
+                        "$ref": "#/parameters/tags"
+                    },
+                    {
+                        "$ref": "#/parameters/conjunction"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/ContentPlacements"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rooms/{room_uuid}/variations/{variation}/rules/{rule_uuid}": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets A 'Rule` object for a given variation.\nOptional query params of **projection** or **fields** determines\nfields of Room object returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/rule_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Room Rule is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes a rule object",
+                "description": "Deletes a rule object from the Contents list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/rule_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful response"
+                    },
+                    "404": {
+                        "description": "When a Rule object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/rooms/{room_uuid}/variations/{variation}/rules": {
+            "post": {
+                "summary": "Adds a 'Rule' object to for a given room and variation",
+                "description": "Adds a new Rule object to the Room Rules list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    },
+                    {
+                        "name": "rule",
+                        "in": "body",
+                        "required": true,
+                        "description": "The Room Rule to be added.",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    },
+                    "400": {
+                        "description": "When a Room Rule is NOT created",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Modifies a 'Rule' object to for a given room and variation",
+                "description": "Modifies a new Rule object to the Room Rules list.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    },
+                    {
+                        "name": "rule",
+                        "in": "body",
+                        "required": true,
+                        "description": "The Room to create.",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Rule"
+                        }
+                    },
+                    "400": {
+                        "description": "When a Room Rule is NOT created",
+                        "schema": {
+                            "$ref": "#/definitions/NotCreatedError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/layouts/rooms/{room_uuid}": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets `Layout` objects.\nOptional query params of **projection** or **fields** determines\nfields of content object returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Layouts"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Content object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        },
+        "/layouts/rooms/{room_uuid}/variations/{variation}": {
+            "get": {
+                "summary": "This is a GET operation",
+                "description": "Gets `Layout` objects.\nOptional query params of **projection** or **fields** determines\nfields of content object returned.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/room_uuid"
+                    },
+                    {
+                        "$ref": "#/parameters/variation"
+                    },
+                    {
+                        "$ref": "#/parameters/fields"
+                    },
+                    {
+                        "$ref": "#/parameters/projection"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/Layout"
+                        }
+                    },
+                    "404": {
+                        "description": "When a Content object is NOT found",
+                        "schema": {
+                            "$ref": "#/definitions/NotFoundError"
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "schema": {
+                            "$ref": "#/definitions/GeneralError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "GeneralError": {
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "NotFoundError": {
+            "required": [
+                "message",
+                "hint"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "hint": {
+                    "type": "string"
+                }
+            }
+        },
+        "NotCreatedError": {
+            "required": [
+                "message",
+                "hint"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "hint": {
+                    "type": "string"
+                }
+            }
+        },
+        "3DPoint": {
+            "required": [
+                "x_value",
+                "y_value",
+                "z_value"
+            ],
+            "properties": {
+                "x_value": {
+                    "type": "number"
+                },
+                "y_value": {
+                    "type": "number"
+                },
+                "z_value": {
+                    "type": "number"
+                }
+            },
+            "example": {
+                "x_value": 2,
+                "y_value": 3,
+                "z_value": 5
+            }
+        },
+        "SpatialCommon": {
+            "required": [
+                "uuid",
+                "bounding_box_dim"
+            ],
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                },
+                "bounding_box_dim": {
+                    "$ref": "#/definitions/3DPoint"
+                },
+                "clearance_box_dim": {
+                    "$ref": "#/definitions/3DPoint"
+                },
+                "clearance_box_offset": {
+                    "$ref": "#/definitions/3DPoint"
+                }
+            },
+            "example": {
+                "uuid": "0f7b4a2b-cfaf-4af2-ba5b-fe45cb110874",
+                "bounding_box_dim": {
+                    "x": 2,
+                    "y": 3,
+                    "z": 5
+                },
+                "clearance_box_dim": {
+                    "x": 5,
+                    "y": 8,
+                    "z": 9
+                },
+                "clearance_box_offset": {
+                    "x": 8,
+                    "y": 10,
+                    "z": 12
+                }
+            }
+        },
+        "SpatialPlacement": {
+            "required": [
+                "uuid"
+            ],
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                },
+                "translation": {
+                    "$ref": "#/definitions/3DPoint"
+                },
+                "orientation": {
+                    "$ref": "#/definitions/3DPoint"
+                }
+            },
+            "example": {
+                "uuid": "0f7b4a2b-cfaf-4af2-ba5b-fe45cb110874",
+                "translation": {
+                    "x": 2,
+                    "y": 3,
+                    "z": 5
+                },
+                "orientation": {
+                    "x": 5,
+                    "y": 8,
+                    "z": 9
+                },
+                "instance_id": 0
+            }
+        },
+        "UnitsEnum": {
+            "type": "integer",
+            "enum": [
+                "m",
+                "mm",
+                "ft",
+                "in"
+            ]
+        },
+        "Content": {
+            "required": [
+                "uuid",
+                "name",
+                "cell_name"
+            ],
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "cell_name": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "integer",
+                    "enum": [
+                        "CSWK",
+                        "FURN",
+                        "FIXTURE",
+                        "SPECIALTY",
+                        "EQUIPMENT",
+                        "SPECIAL_EQUIPMENT",
+                        "DOOR",
+                        "WINDOW"
+                    ]
+                },
+                "sub_category": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "model_url": {
+                    "type": "string"
+                },
+                "units": {
+                    "$ref": "#/definitions/UnitsEnum"
+                },
+                "spatial_rep": {
+                    "$ref": "#/definitions/SpatialCommon"
+                }
+            },
+            "example": {
+                "uuid": "0f7b4a2b-cfaf-4af2-ba5b-fe45cb110874",
+                "name": "Chair",
+                "description": "This is a fancy chair",
+                "category": "FURN",
+                "model_url": "http://s7d2.scene7.com/is/image/DesignWithinReach/PD_6649_ALT1?$thumb$",
+                "units": "in",
+                "spatial_rep": {
+                    "uuid": "0f7b4a2b-cfaf-4af2-ba5b-fe45cb110874"
+                }
+            }
+        },
+        "RuleObject": {
+            "required": [
+                "uuid"
+            ],
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                },
+                "content_uuid": {
+                    "type": "string"
+                },
+                "instance_spec": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "content_handle": {
+                    "type": "integer",
+                    "enum": [
+                        "TOP",
+                        "BOTTOM",
+                        "FRONT",
+                        "BACK",
+                        "LEFT",
+                        "RIGHT",
+                        "CENTERLINE_X",
+                        "CENTERLINE_Y",
+                        "CENTERLINE_Z"
+                    ]
+                },
+                "room_handle": {
+                    "type": "string",
+                    "enum": [
+                        "FLOOR",
+                        "CEILING",
+                        "WALL_FRONT",
+                        "WALL_LEFT",
+                        "WALL_RIGHT",
+                        "WALL_BACK"
+                    ]
+                },
+                "type": {
+                    "type": "integer",
+                    "enum": [
+                        "SOURCE",
+                        "TARGET"
+                    ]
+                }
+            },
+            "example": {
+                "uuid": "0f7b4a2b-cfaf-4af2-ba5b-fe45cb110874",
+                "content": {
+                    "uuid": "9f7b4a2b-cfaf-4af2-ba5b-fe45cb110874"
+                },
+                "type": "SOURCE",
+                "content_handle": "FRONT",
+                "instance_spec": [
+                    0,
+                    1
+                ]
+            }
+        },
+        "RuleObjects": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/RuleObject"
+            }
+        },
+        "Rule": {
+            "required": [
+                "uuid"
+            ],
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer",
+                    "enum": [
+                        "ALONG_WALL",
+                        "ALONG_SAME_WALL_AS",
+                        "ALONG_OPPOSITE_WALL_AS",
+                        "ALONG_WALL_PERPENDICULAR_TO",
+                        "ALONG_WALL_TO_THE_LEFT",
+                        "ALONG_WALL_TO_THE_RIGHT",
+                        "AT_DISTANCE",
+                        "IS_ON",
+                        "IS_CENTERED_ON",
+                        "IS_ALIGNED_WITH",
+                        "IS_PARALLEL_TO",
+                        "IS_PERPENDICULAR_TO",
+                        "IS_LEFT_OF",
+                        "IS_RIGHT_OF",
+                        "IS_ABOVE",
+                        "IS_BELOW",
+                        "IS_IN_FRONT_OF",
+                        "IS_BEHIND",
+                        "IS_DISTRIBUTED_ALONG",
+                        "_AND_",
+                        "_OR_"
+                    ]
+                },
+                "low_value": {
+                    "type": "number"
+                },
+                "high_value": {
+                    "type": "number"
+                },
+                "units": {
+                    "$ref": "#/definitions/UnitsEnum"
+                },
+                "target_objects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gen_uuid"
+                    }
+                },
+                "reference_objects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gen_uuid"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "sub_rules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gen_uuid"
+                    }
+                }
+            }
+        },
+        "Room": {
+            "required": [
+                "uuid",
+                "name"
+            ],
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "units": {
+                    "$ref": "#/definitions/UnitsEnum"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "spatial_common": {
+                    "$ref": "#/definitions/SpatialCommon"
+                }
+            },
+            "example": {
+                "uuid": "0f7b4a2b-cfaf-4af2-ba5b-fe45cb110874",
+                "name": "ExamRoom-1",
+                "units": "in",
+                "spatial_common": {
+                    "uuid": "0f7b4a2b-cfaf-4af2-ba5b-fe45cb110874"
+                }
+            }
+        },
+        "ContentPlacement": {
+            "required": [
+                "instance_id"
+            ],
+            "properties": {
+                "room": {
+                    "$ref": "#/definitions/gen_uuid"
+                },
+                "content": {
+                    "$ref": "#/definitions/gen_uuid"
+                },
+                "instance_id": {
+                    "type": "integer"
+                },
+                "placement": {
+                    "$ref": "#/definitions/SpatialPlacement"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "variation": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Contents": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Content"
+            }
+        },
+        "Rooms": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Room"
+            }
+        },
+        "Rules": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Rule"
+            }
+        },
+        "ContentPlacements": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ContentPlacement"
+            }
+        },
+        "Layout": {
+            "required": [
+                "content_placements",
+                "rules",
+                "variation"
+            ],
+            "properties": {
+                "content_placements": {
+                    "$ref": "#/definitions/gen_uuid_array"
+                },
+                "rules": {
+                    "$ref": "#/definitions/gen_uuid_array"
+                },
+                "variation": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Layouts": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Layout"
+            }
+        },
+        "User": {
+            "required": [
+                "uuid",
+                "email",
+                "password"
+            ],
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "example": {
+                "uuid": "0f7b4a2b-cfaf-4af2-ba5b-fe45cb110874",
+                "name": "Great User",
+                "email": "greatuser@aditazz.com"
+            }
+        },
+        "Role": {
+            "required": [
+                "uuid",
+                "user",
+                "service",
+                "access"
+            ],
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/gen_uuid"
+                },
+                "service": {
+                    "type": "integer",
+                    "enum": [
+                        "USER",
+                        "GEOMETRY",
+                        "CONTENT",
+                        "RULE",
+                        "ROOM"
+                    ]
+                },
+                "access": {
+                    "type": "integer",
+                    "enum": [
+                        "READ",
+                        "WRITE",
+                        "FULL"
+                    ]
+                }
+            }
+        },
+        "Token": {
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "Users": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/User"
+            }
+        },
+        "Roles": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Role"
+            }
+        },
+        "gen_uuid": {
+            "type": "string"
+        },
+        "gen_uuid_array": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/gen_uuid"
+            }
+        }
+    },
+    "parameters": {
+        "uuid": {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "description": "The unique id of the entity",
+            "type": "string"
+        },
+        "rule_uuid": {
+            "name": "rule_uuid",
+            "in": "path",
+            "required": true,
+            "description": "The unique id of the room",
+            "type": "string"
+        },
+        "user_uuid": {
+            "name": "user_uuid",
+            "in": "path",
+            "required": true,
+            "description": "The unique id of the user",
+            "type": "string"
+        },
+        "service_id": {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "description": "The unique id of the service",
+            "type": "integer"
+        },
+        "room_uuid": {
+            "name": "room_uuid",
+            "in": "path",
+            "required": true,
+            "description": "The unique id of the room",
+            "type": "string"
+        },
+        "content_uuid": {
+            "name": "content_uuid",
+            "in": "path",
+            "required": true,
+            "description": "The unique id of the content object",
+            "type": "string"
+        },
+        "content_uuid_q": {
+            "name": "content_uuid",
+            "in": "query",
+            "required": true,
+            "description": "The unique id of the content object",
+            "type": "string"
+        },
+        "variation": {
+            "name": "variation",
+            "in": "path",
+            "required": true,
+            "description": "The variation number for the placements",
+            "type": "integer"
+        },
+        "room_name": {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "description": "The unique name of the room",
+            "type": "string"
+        },
+        "tags": {
+            "name": "tags",
+            "in": "query",
+            "required": true,
+            "description": "The comma separated tags list",
+            "type": "string"
+        },
+        "generic_uuids": {
+            "name": "uuids",
+            "in": "query",
+            "required": true,
+            "description": "The comma separated generic uuids list",
+            "type": "string"
+        },
+        "conjunction": {
+            "name": "conjunction",
+            "in": "query",
+            "required": true,
+            "default": true,
+            "description": "Conjunction is true (all tags to be present), false (one or more tags to be present)",
+            "type": "boolean"
+        },
+        "cell_name": {
+            "name": "cell_name",
+            "in": "query",
+            "required": true,
+            "description": "The Aditazz's unique id of the content",
+            "type": "string"
+        },
+        "email": {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "description": "The user's email address",
+            "type": "string"
+        },
+        "pageSize": {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of objects returned",
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "multipleOf": 10,
+            "default": 20
+        },
+        "pageNumber": {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "Page number",
+            "type": "integer",
+            "default": 1
+        },
+        "fields": {
+            "name": "fields",
+            "in": "query",
+            "description": "Comma separated field names",
+            "type": "string",
+            "required": false
+        },
+        "projection": {
+            "name": "projection",
+            "in": "query",
+            "description": "The projection type to control the fields returned. The **compact** will return a few essential fields, the **medium** will return a few more additional fields than the **compact** type, and the **full** type will return all the fields.\n",
+            "required": false,
+            "type": "integer",
+            "enum": [
+                "compact",
+                "medium",
+                "full"
+            ]
+        }
+    }
+}
